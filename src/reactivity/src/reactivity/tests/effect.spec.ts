@@ -69,7 +69,9 @@ describe('effect', () => {
     obj.foo = 3
     expect(dummy).toBe(3);
     stop(runner);
-    obj.foo = 4;
+    // obj.foo = 4;
+    // 优化stop，边缘case
+    obj.foo++;
     expect(dummy).toBe(3);
     
     runner()

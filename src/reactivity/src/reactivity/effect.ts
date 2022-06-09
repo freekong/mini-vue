@@ -2,6 +2,9 @@
 
 import { extend } from "../shared";
 
+let targetMap = new Map();
+let currentEffect;
+let shouldTrack;
 class ReactiveEffect{
   private _fn: any;
   deps = [];
@@ -12,8 +15,15 @@ class ReactiveEffect{
   }
 
   run() {
+    if (!this.active) {
+      return this._fn()
+      
+    }
     currentEffect = this
-    return this._fn()
+    shouldTrack = true
+    const resoult = this._fn()
+    shouldTrack = false
+    return resoult
   }
 
   stop() {
@@ -31,12 +41,11 @@ function clearupEffect(effect) {
   effect.deps.forEach((eff : any) => {
     eff.delete(effect)
   })
+  effect.deps.length = 0
 }
 
-let targetMap = new Map();
-let currentEffect;
-
 export function track(target, key) {
+  if (!isTracking()) return;
   let depsMap = targetMap.get(target)
   if (!depsMap) {
     depsMap = new Map()
@@ -48,9 +57,18 @@ export function track(target, key) {
     dep = new Set()
     depsMap.set(key, dep)
   }
-  if (!currentEffect) return;
+
+  trackEffects(dep)
+}
+
+export function trackEffects(dep) {
+  if (dep.has(currentEffect)) return;
   dep.add(currentEffect)
   currentEffect.deps.push(dep)
+}
+
+export function isTracking() {
+  return shouldTrack && currentEffect !== undefined
 }
 
 export function trigger(target, key) {
@@ -58,6 +76,10 @@ export function trigger(target, key) {
 
   let dep = depsMap.get(key)
 
+  triggerEffects(dep)
+}
+
+export function triggerEffects(dep) {
   dep.forEach(eff => {
     if (eff.scheduler) {
       eff.scheduler()

@@ -5,7 +5,7 @@ import { extend } from "../shared";
 let targetMap = new Map();
 let currentEffect;
 let shouldTrack;
-export class ReactiveEffect{
+export class ReactiveEffect {
   private _fn: any;
   deps = [];
   active = true;
@@ -17,7 +17,6 @@ export class ReactiveEffect{
   run() {
     if (!this.active) {
       return this._fn()
-      
     }
     currentEffect = this
     shouldTrack = true

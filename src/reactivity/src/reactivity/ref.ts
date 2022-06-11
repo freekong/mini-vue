@@ -3,7 +3,7 @@ import { trackEffects, triggerEffects, isTracking } from "./effect";
 import { reactive } from "./reactive";
 
 class refImpl {
-  private _value: any
+  private _value: any;
   private _rawValue: any;
   public __v_isRef = true;
   public dep;
@@ -48,8 +48,8 @@ export function unRef(ref) {
   return isRef(ref) ? ref.value : ref
 }
 
-export function proxyRefs(obj) {
-  return new Proxy(obj, {
+export function proxyRefs(objectWithRefs) {
+  return new Proxy(objectWithRefs, {
     get(target, key) {
       // 如果是ref -> 返回.value
       // 如果不是ref -> 直接放回本身
@@ -57,8 +57,9 @@ export function proxyRefs(obj) {
     },
     set(target, key, value) {
       if (isRef(target[key]) && !isRef(value)) {
-        // 如果原先的值是ref, 设置的值不是ref。 要将原来的ref.value 设置为 value，然后返回value 
-        return target[key].value = value
+        // 如果原先的值是ref, 设置的值不是ref。 要将原来的ref.value 设置为 value
+        target[key].value = value
+        return true
       } else {
         // 其他情况直接替换就ok了
         return Reflect.set(target, key, value)

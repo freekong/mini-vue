@@ -1,5 +1,7 @@
 import { isObject } from "../reactivity/src/shared/index";
+import { ShapeFlags } from "../shared/ShapeFlags";
 import { createComponentInstance, setupComponent } from "./component";
+import { createVNode } from "./vnode";
 
 export function render(vnode, container) {
   // 调用patch, 为了后面的递归处理
@@ -7,12 +9,15 @@ export function render(vnode, container) {
 }
 
 function patch(vnode, container) {
-  debugger
+  // debugger
   console.log('%c [ vnode ]-9', 'font-size:13px; background:pink; color:#bf2c9f;', vnode)
   // 判断vnode.type的类型是 component 还是 element
-  if (typeof vnode.type === 'string') {
+  const { shapeFlag } = vnode
+  if (shapeFlag & ShapeFlags.ELEMENT) {
+    // element
     processElement(vnode, container)
-  } else if (isObject(vnode.type)) {
+  } else if (shapeFlag & ShapeFlags.STATEFUL_COMPONENT) {
+    // stateful_component
     processComponent(vnode, container);
   }
 
@@ -24,16 +29,18 @@ function processElement(vnode: any, container: any) {
   
 }
 
-function mountElement(vnode: any, container: any) {
-  const el = document.createElement(vnode.type);
+function mountElement(vnode: any, container: any) { 
+  const el = vnode.el = document.createElement(vnode.type);
 
-  const { props, children } = vnode
+  const { props, children, shapeFlag } = vnode
 
-  if (typeof children === 'string') {
+  if (shapeFlag & ShapeFlags.TEXT_CHILDREN) {
+    // text_children
 
     el.textContent = children
 
-  } else if (Array.isArray(children)) {
+  } else if (shapeFlag & ShapeFlags.ARRAY_CHILDREN) {
+    // array_children
 
     mountChildren(vnode, el)
 
@@ -57,19 +64,22 @@ function processComponent(vnode: any, container: any) {
   mountComponent(vnode, container)
 }
 
-function mountComponent(vnode: any, container: any) {
-  const instance = createComponentInstance(vnode) // {vnode, type: vnode.type}
-
+function mountComponent(initialVnode: any, container: any) {
+  const instance = createComponentInstance(initialVnode) // {vnode, type: vnode.type}
+  
   setupComponent(instance)
   
-  setupRenderEffect(instance, container)
+  setupRenderEffect(instance, initialVnode, container)
 }
 
 
-function setupRenderEffect(instance, container) {
-  const subTree = instance.render()
+function setupRenderEffect(instance, initialVnode, container) {
+  const { proxy } = instance
+  const subTree = instance.render.call(proxy)
 
   patch(subTree, container)
+
+  initialVnode.el = subTree.el 
 }
 
 

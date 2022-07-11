@@ -1,7 +1,9 @@
 import { h } from '../../lib/mini-vue.esm.js'
 
+window.self = null
 export const App = {
   render() {
+    window.self = this
     return h(
       "div", 
       {
@@ -10,14 +12,14 @@ export const App = {
       },
       [
         h('h3', { class: "red" }, "hello"),
-        h("h3", { class: "yellow" }, "mini-vue")
+        h("h3", { class: "yellow" }, "mini-vue" + this.msg)
       ]
-    //  "hi, mini-vue"
+    //  "hi, mini-vue" + this.msg
     )
   },
   setup() {
     return {
-      msg: 'ddd'
+      msg: 'dddjjj'
     }
   }
 }

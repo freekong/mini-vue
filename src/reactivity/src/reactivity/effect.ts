@@ -1,6 +1,6 @@
 
 
-import { extend } from "../shared";
+import { extend } from "../../../shared";
 
 let targetMap = new Map();
 let currentEffect;

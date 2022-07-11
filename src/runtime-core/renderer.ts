@@ -1,4 +1,3 @@
-import { isObject } from "../reactivity/src/shared/index";
 import { ShapeFlags } from "../shared/ShapeFlags";
 import { createComponentInstance, setupComponent } from "./component";
 import { createVNode } from "./vnode";

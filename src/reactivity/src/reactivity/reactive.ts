@@ -1,4 +1,5 @@
 
+import { isObject } from '../../../shared'
 import { mutableHandlers, readonlyHandlers, shallowReadonlyHandlers } from './baseHandler'
 
 export const enum ReactiveFlags {
@@ -19,6 +20,10 @@ export function shallowReadonly(obj) {
 }
 
 function createActiveObject(obj: any, baseHandler) {
+  if (!isObject(obj)) {
+    console.warn(`${ obj }不是一个对象`)
+    return obj
+  }
   return new Proxy(obj, baseHandler)
 }
 

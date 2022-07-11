@@ -8,7 +8,13 @@ export const App = {
       "div", 
       {
         id: "root",
-        class: ["red", "main"]
+        class: ["red", "main"],
+        onClick: (e) => {
+          console.log(e, 'click')
+        },
+        onMousedown: () => {
+          console.log('mousedown')
+        }
       },
       [
         h('h3', { class: "red" }, "hello"),

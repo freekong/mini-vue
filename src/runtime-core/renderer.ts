@@ -1,6 +1,6 @@
 import { ShapeFlags } from "../shared/ShapeFlags";
 import { createComponentInstance, setupComponent } from "./component";
-import { createVNode } from "./vnode";
+// import { createVNode } from "./vnode";
 
 export function render(vnode, container) {
   // 调用patch, 为了后面的递归处理
@@ -71,6 +71,7 @@ function processComponent(vnode: any, container: any) {
 
 function mountComponent(initialVnode: any, container: any) {
   const instance = createComponentInstance(initialVnode) // {vnode, type: vnode.type}
+  console.log('%c [ 实例instance ]-74', 'font-size:13px; background:pink; color:#bf2c9f;', instance)
   
   setupComponent(instance)
   

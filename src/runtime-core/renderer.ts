@@ -1,5 +1,6 @@
 import { ShapeFlags } from "../shared/ShapeFlags";
 import { createComponentInstance, setupComponent } from "./component";
+import { Fragment, Text } from "./vnode";
 // import { createVNode } from "./vnode";
 
 export function render(vnode, container) {
@@ -11,15 +12,37 @@ function patch(vnode, container) {
   // debugger
   console.log('%c [ vnode ]-9', 'font-size:13px; background:pink; color:#bf2c9f;', vnode)
   // 判断vnode.type的类型是 component 还是 element
-  const { shapeFlag } = vnode
-  if (shapeFlag & ShapeFlags.ELEMENT) {
-    // element
-    processElement(vnode, container)
-  } else if (shapeFlag & ShapeFlags.STATEFUL_COMPONENT) {
-    // stateful_component
-    processComponent(vnode, container);
+  const { shapeFlag, type } = vnode
+
+  switch (type) {
+    case Fragment:
+      processFragment(vnode, container)
+      break;
+    case Text:
+      processText(vnode, container)
+      break
+    default:
+      if (shapeFlag & ShapeFlags.ELEMENT) {
+        // element
+        processElement(vnode, container)
+      } else if (shapeFlag & ShapeFlags.STATEFUL_COMPONENT) {
+        // stateful_component
+        processComponent(vnode, container);
+      }
+      break
   }
 
+
+}
+
+function processText(vnode: any, container: any) {
+  const { children } = vnode
+  const textNode = (vnode.el = document.createTextNode(children))
+  container.append(textNode)
+}
+
+function processFragment(vnode: any, container: any) {
+  mountChildren(vnode, container)
 }
 
 function processElement(vnode: any, container: any) {
@@ -29,7 +52,7 @@ function processElement(vnode: any, container: any) {
 }
 
 function mountElement(vnode: any, container: any) { 
-  const el = vnode.el = document.createElement(vnode.type);
+  const el = (vnode.el = document.createElement(vnode.type));
 
   const { props, children, shapeFlag } = vnode
 

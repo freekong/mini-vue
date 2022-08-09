@@ -1,4 +1,5 @@
 import { h } from '../../lib/mini-vue.esm.js'
+import ArrayToArray from './ArrayToArray.js'
 import ArrayToText from './ArrayToText.js'
 import TextToArray from './TextToArray.js'
 import TextToText from './TextToText.js'
@@ -19,9 +20,9 @@ export const App = {
         // 老的是text,新的是text
         // h(TextToText)
         // 老的是text,新的是Array
-        h(TextToArray)
+        // h(TextToArray)
         // 老的是Array,新的是Array (复杂)
-        
+        h(ArrayToArray)
       ]
     )
   },

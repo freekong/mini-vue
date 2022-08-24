@@ -2,6 +2,7 @@ import { effect } from "../reactivity/src/reactivity/effect";
 import { EMPTY_OBJ } from "../shared";
 import { ShapeFlags } from "../shared/ShapeFlags";
 import { createComponentInstance, setupComponent } from "./component";
+import { shouldUpdateComponent } from "./componentUpdateUtils";
 import { createAppAPI } from "./createApp";
 import { Fragment, Text } from "./vnode";
 // import { createVNode } from "./vnode";
@@ -343,11 +344,17 @@ export function createRenderer(options) {
   }
 
   function processComponent(n1, n2: any, container: any, parentComponent: any, anchor) {
-    mountComponent(n2, container, parentComponent, anchor)
+    console.log('%c [ n1 ]-346', 'font-size:13px; background:pink; color:#bf2c9f;', n1)
+    console.log('%c [ n2 ]-346', 'font-size:13px; background:pink; color:#bf2c9f;', n2)
+    if (!n1) {
+      mountComponent(n2, container, parentComponent, anchor)
+    } else {
+      updateComponent(n1, n2)
+    }
   }
 
   function mountComponent(initialVnode: any, container: any, parentComponent: any, anchor) {
-    const instance = createComponentInstance(initialVnode, parentComponent) // {vnode, type: vnode.type}
+    const instance = (initialVnode.component = createComponentInstance(initialVnode, parentComponent)) // {vnode, type: vnode.type}
     console.log('%c [ 实例instance ]-74', 'font-size:13px; background:pink; color:#bf2c9f;', instance)
     
     setupComponent(instance)
@@ -355,9 +362,19 @@ export function createRenderer(options) {
     setupRenderEffect(instance, initialVnode, container, anchor)
   }
 
+  function updateComponent(n1, n2) {
+    const instance = (n2.component = n1.component)
+    if (shouldUpdateComponent(n1, n2)) {
+      instance.next = n2
+      instance.update()
+    } else {
+      n1.el = n2.el
+      instance.vnode = n2
+    }
+  }
 
   function setupRenderEffect(instance, initialVnode, container, anchor) {
-    effect(() => {
+    instance.update = effect(() => {
       // debugger
       if (!instance.isMounted) {
         console.log('[ init ] >')
@@ -373,7 +390,12 @@ export function createRenderer(options) {
       } else {
         console.log('[ update ] >')
 
-        const { proxy } = instance;
+        const {next, vnode, proxy} = instance
+        if (next) {
+          next.el = vnode.el
+          updateComponentPreRender(instance, next)
+        }
+
         const subTree = instance.render.call(proxy);
         const prevSubTree = instance.subTree
 
@@ -389,6 +411,18 @@ export function createRenderer(options) {
   }
 }
 
+function updateComponentPreRender(instance, nextVnode) {
+  instance.vnode = nextVnode
+  instance.next = null
+
+  instance.props = nextVnode.props
+}
+
+/**
+ * @description: 最长递增子序列算法
+ * @param {*} arr
+ * @return {*}
+ */
 function getSequence(arr) {
   const p = arr.slice();
   const result = [0];

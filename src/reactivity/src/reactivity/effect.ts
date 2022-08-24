@@ -95,10 +95,9 @@ export function effect(fn, options: any = {}) {
   // _effect.onStop = options.onStop
   extend(_effect, options)
   _effect.run()
-
-  // 两种方式都可以
+  
   const runner: any = _effect.run.bind(_effect)
-  // return _effect.run.bind(currentEffect)
+  
   runner.effect = _effect
   // console.log("runner========>", runner)
   return runner

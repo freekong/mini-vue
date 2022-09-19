@@ -4,6 +4,7 @@ import { ShapeFlags } from "../shared/ShapeFlags";
 import { createComponentInstance, setupComponent } from "./component";
 import { shouldUpdateComponent } from "./componentUpdateUtils";
 import { createAppAPI } from "./createApp";
+import { queueJobs } from "./scheduler";
 import { Fragment, Text } from "./vnode";
 // import { createVNode } from "./vnode";
 
@@ -377,7 +378,7 @@ export function createRenderer(options) {
     instance.update = effect(() => {
       // debugger
       if (!instance.isMounted) {
-        console.log('[ init ] >')
+        console.log('[ init instance ] >')
         const { proxy } = instance;
         const subTree = (instance.subTree = instance.render.call(proxy));
         // console.log('%c [ subTree ]-121', 'font-size:13px; background:pink; color:#bf2c9f;', subTree)
@@ -388,7 +389,7 @@ export function createRenderer(options) {
 
         instance.isMounted = true
       } else {
-        console.log('[ update ] >')
+        console.log('[ update instance ] >')
 
         const {next, vnode, proxy} = instance
         if (next) {
@@ -402,6 +403,11 @@ export function createRenderer(options) {
         instance.subTree = subTree
     
         patch(prevSubTree, subTree, container, instance, anchor);
+      }
+    }, {
+      scheduler: () => {
+        console.log('[ update-scheduler ] >')
+        queueJobs(instance.update)
       }
     })
   }

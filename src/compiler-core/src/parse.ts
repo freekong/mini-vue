@@ -30,7 +30,7 @@ function parseInterpolation(context) {
   return {
     type: NodeTypes.INTERPOLATION,
     content: {
-      type: NodeTypes.SIMPLE_INTERPOLATION,
+      type: NodeTypes.SIMPLE_EXPRESSION,
       content
     }
   }
@@ -140,7 +140,8 @@ function createParserContext(content: any) {
 
 function createRoot(children) {
   return {
-    children
+    children,
+    type: NodeTypes.ROOT
   }
 }
 

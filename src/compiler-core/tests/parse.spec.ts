@@ -11,7 +11,7 @@ describe('parse', () => {
       expect(ast.children[0]).toStrictEqual({
         type: NodeTypes.INTERPOLATION,
         content: {
-          type: NodeTypes.SIMPLE_INTERPOLATION,
+          type: NodeTypes.SIMPLE_EXPRESSION,
           content: 'message'
         }
       })
@@ -56,7 +56,7 @@ describe('parse', () => {
         {
           type: NodeTypes.INTERPOLATION,
           content: {
-            type: NodeTypes.SIMPLE_INTERPOLATION,
+            type: NodeTypes.SIMPLE_EXPRESSION,
             content: 'message'
           }
         }
@@ -85,7 +85,7 @@ describe('parse', () => {
         {
           type: NodeTypes.INTERPOLATION,
           content: {
-            type: NodeTypes.SIMPLE_INTERPOLATION,
+            type: NodeTypes.SIMPLE_EXPRESSION,
             content: 'message'
           }
         }

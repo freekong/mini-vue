@@ -1,8 +1,13 @@
+import { NodeTypes } from "./ast"
+import { helperNameMap, TO_DISPLAY_STRING } from "./runtimeHelpers"
+
 export function generate(ast) {
 
   const context = createCodegenContext()
   const { push } = context
-  push('return ')
+
+  console.log('[ ast ] >', ast)
+  genFunctionPreamble(ast, context)
 
   const functionName = 'render'
   const args = ["_ctx", "_cache"]
@@ -19,16 +24,59 @@ export function generate(ast) {
   }
 }
 
+function genFunctionPreamble(ast, context) {
+  const { push } = context
+  const vueBinging = "Vue"
+  const aliasHelper = (s) => `${helperNameMap[s]}: _${helperNameMap[s]}`
+  if (ast.helpers.length > 0) {
+    push(`const { ${ast.helpers.map(aliasHelper).join(',')} } = ${vueBinging}`)
+  }
+  push('\n')
+  push('return ')
+}
+
 function getNode(node: any, context: any) {
-  const {push} = context
+  console.log('[ node ] >', node)
+
+  switch (node.type) {
+    case NodeTypes.TEXT:
+      genText(node, context)    
+      break;
+    case NodeTypes.INTERPOLATION:
+      genInterPolation(node, context)
+      break;
+    case NodeTypes.SIMPLE_EXPRESSION:
+      genExpression(node, context)
+    default:
+      break;
+  }
+}
+
+function genExpression(node: any, context: any) {
+  const { push } = context
+  push(`${node.content}`)
+}
+
+function genInterPolation(node: any, context: any) {
+  const { push, helper } = context
+  push(`${helper(TO_DISPLAY_STRING)}(`)
+  getNode(node.content, context)
+  push(')')
+}
+
+function genText(node: any, context: any) {
+  const { push } = context
   push(`'${node.content}'`)
 }
 
 function createCodegenContext() {
   const context = {
     code: '',
-    push: (source) => context.code += source
+    push: (source) => context.code += source,
+    helper: (key) => `_${helperNameMap[key]}`
   }
   return context
 }
+
+
 

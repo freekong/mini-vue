@@ -1,9 +1,18 @@
-import { NodeTypes } from "../ast";
-import { CREATE_ELEMENT_VNODE } from "../runtimeHelpers";
+import { createVnodeCall, NodeTypes } from "../ast";
 
 export function transformElement(node, context) {
 
   if (node.type === NodeTypes.ELEMENT) {
-    context.helper(CREATE_ELEMENT_VNODE)
+    return () => {
+  
+      const vnodeTag = `"${node.tag}"`
+  
+      let vnodeProps;
+  
+      const children = node.children
+      const vnodeChildren = children[0]
+  
+      node.codegenNode = createVnodeCall(context, vnodeTag, vnodeProps, vnodeChildren)
+    }
   }
 }

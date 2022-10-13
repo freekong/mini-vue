@@ -1,3 +1,4 @@
+import { isString } from "../../shared"
 import { NodeTypes } from "./ast"
 import { CREATE_ELEMENT_VNODE, helperNameMap, TO_DISPLAY_STRING } from "./runtimeHelpers"
 
@@ -6,7 +7,7 @@ export function generate(ast) {
   const context = createCodegenContext()
   const { push } = context
 
-  console.log('[ ast ] >', ast)
+  console.log('[ ast.codegenNode ] >', ast.codegenNode)
   genFunctionPreamble(ast, context)
 
   const functionName = 'render'
@@ -48,17 +49,66 @@ function getNode(node: any, context: any) {
     case NodeTypes.SIMPLE_EXPRESSION:
       genExpression(node, context)
       break;
-    case NodeTypes.ELEMENT:
-      genElement(node, context)
+      case NodeTypes.ELEMENT:
+    genElement(node, context)
+    break;
+    case NodeTypes.COMPOUND_EXPRESSION:
+      genCompoundExpression(node, context)
     default:
       break;
+  }
+}
+      
+function genCompoundExpression(node: any, context: any) {
+  
+  const { push } = context
+  const { children } = node
+
+  for (let i = 0; i < children.length; i++) {
+    const child = children[i];
+    if (isString(child)) {
+      push(child)
+    } else {
+      getNode(child, context)      
+    }
   }
 }
 
 function genElement(node, context) {
   const { push, helper } = context
-  const { tag } = node
-  push(`${helper(CREATE_ELEMENT_VNODE)}("${ tag }")`)
+  const { tag, props, children } = node
+  console.log('==============node', node.children)
+  push(`${helper(CREATE_ELEMENT_VNODE)}(`)
+  genNodeList(genNullableArgs([tag, props, children]), context)
+  // getNode(children, context)
+  push(')')
+}
+
+function genNodeList(nodes, context) {
+
+  const { push } = context
+
+  for (let i = 0; i < nodes.length; i++) {
+    const node = nodes[i];
+    if (isString(node)) {
+      push(node)
+    } else {
+      getNode(node, context)
+    }
+    if (i < nodes.length - 1) {
+      push(', ')
+    }
+  }
+}
+
+function genNullableArgs(args: any[]) {
+  let i = args.length
+
+  while(i--) {
+    if (args[i] != null) break
+  }
+  return args.slice(0, i + 1).map(arg => arg || 'null')
+
 }
 
 function genExpression(node: any, context: any) {
@@ -86,6 +136,4 @@ function createCodegenContext() {
   }
   return context
 }
-
-
 

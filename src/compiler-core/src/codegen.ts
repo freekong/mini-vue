@@ -49,11 +49,12 @@ function getNode(node: any, context: any) {
     case NodeTypes.SIMPLE_EXPRESSION:
       genExpression(node, context)
       break;
-      case NodeTypes.ELEMENT:
-    genElement(node, context)
-    break;
+    case NodeTypes.ELEMENT:
+      genElement(node, context)
+      break;
     case NodeTypes.COMPOUND_EXPRESSION:
       genCompoundExpression(node, context)
+      break;
     default:
       break;
   }
